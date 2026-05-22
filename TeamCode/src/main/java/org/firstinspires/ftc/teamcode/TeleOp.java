@@ -15,7 +15,7 @@ public class TeleOp extends OpMode {
 
     @Override
     public void init() {
-        robot.init(red);
+        robot.init(red, hardwareMap);
     }
 
     @Override

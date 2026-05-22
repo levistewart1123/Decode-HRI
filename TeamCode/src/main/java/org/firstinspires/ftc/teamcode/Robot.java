@@ -10,11 +10,13 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.util.Timing;
 
 import org.firstinspires.ftc.teamcode.subsystems.BeamBreaks;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Kickstand;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 
 
@@ -41,6 +43,7 @@ public class Robot {
     public Shooter shooter;
     public Follower f;
     public BeamBreaks beamBreaks;
+    public Kickstand kickstand;
     Timing.Timer shootTimer = new Timing.Timer(700, TimeUnit.MILLISECONDS);
     boolean waitForOpen;
     public boolean autoAiming = false;
@@ -98,10 +101,16 @@ public class Robot {
             handleAimingDrive()
     );
 
-    public void init(boolean red){
+    public void init(boolean red, HardwareMap hwMap){
         intake = new Intake();
         shooter = new Shooter();
         beamBreaks = new BeamBreaks();
+        kickstand = new Kickstand();
+        intake.init(hwMap);
+        shooter.init(hwMap);
+        beamBreaks.init(hwMap);
+        shooter.init(hwMap);
+
         if (red){
             goalPose = Paths.redGoal;
         } else {
@@ -118,6 +127,8 @@ public class Robot {
 
     public void periodic(Gamepad gamepad){
         f.update();
+
+        kickstand.periodic();
 
         if (isShooting) {
             handleShoot();
