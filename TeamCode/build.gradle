@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.dairy.foundation/releases" }
+    }
+    dependencies {
+        classpath "dev.frozenmilk:Load:0.2.4"
+    }
+}
+
 //
 // build.gradle in TeamCode
 //
@@ -15,6 +25,9 @@
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
 
+// Added the Sloth loader plugin here
+apply plugin: 'dev.frozenmilk.sinister.sloth.load'
+
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
 
@@ -22,6 +35,7 @@ android {
         jniLibs.useLegacyPackaging true
     }
 }
+
 
 repositories {
     maven {
@@ -46,20 +60,23 @@ dependencies {
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
     // SolversLib: Latest Stable Version
-
     implementation "org.solverslib:core:0.3.4" // core
     implementation "org.solverslib:pedroPathing:0.3.4" // pedroPathing
     //    implementation "org.solverslib:photon:0.3.4" // photon is optional (see docs for more info)
 
-    implementation "com.acmerobotics.dashboard:dashboard:0.5.1" // FTC Dashboard
+    // Swapped to Sloth-compatible FTC Dashboard
+    implementation "com.acmerobotics.slothboard:dashboard:0.2.4+0.5.1"
 
     // Pedro Pathing
     implementation 'com.pedropathing:ftc:2.1.2'
     implementation 'com.pedropathing:telemetry:1.0.0'
 
-    // Panels Dashboard
-    implementation "com.bylazar:fullpanels:1.0.12"
+    // Swapped to Sloth-compatible Panels Dashboard
+    implementation "com.bylazar.sloth:fullpanels:0.2.4+1.0.12"
 
     // Ivy
     implementation 'com.pedropathing:ivy:1.0.0'
+
+    // Added the Sloth Core Runtime
+    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
 }
