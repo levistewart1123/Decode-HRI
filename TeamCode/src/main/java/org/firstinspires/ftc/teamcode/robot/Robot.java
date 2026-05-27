@@ -319,10 +319,10 @@ public class Robot {
     }
 
     public double getAimingPIDFOutput(){
-        double xDiff = follower.getPose().getX() - goalPose.getX();
-        double yDiff = follower.getPose().getY() - goalPose.getY();
+        double xDiff = goalPose.getX() - follower.getPose().getX();
+        double yDiff = goalPose.getY() - follower.getPose().getY();
         double targetAngle = Math.atan2(xDiff, yDiff);
-        double error = follower.getHeading() - targetAngle; //lab todo check this
+        double error = follower.getHeading() - targetAngle;
 
         PIDFController headingPIDF = new PIDFController(0, 0, 0, 0); //lab todo tune this or base it off of pedro or copy it over from old code
         return headingPIDF.calculate(error); //robot todo ensure radians and degrees don't mix, this whole thing really needs testing

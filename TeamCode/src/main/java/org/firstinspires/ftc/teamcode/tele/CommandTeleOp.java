@@ -41,6 +41,9 @@ public class CommandTeleOp extends OpMode {
         reset();
     }
 
+
+
+
     @Override
     public void start() {
         robot.periodic(gamepad1);
