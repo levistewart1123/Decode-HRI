@@ -79,4 +79,15 @@ dependencies {
 
     // Added the Sloth Core Runtime
     implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
+
+    // JUnit 5 Testing Engine and API
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+
+    // Optional: For parameterized tests if you want to run the same test with different values
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
 }
