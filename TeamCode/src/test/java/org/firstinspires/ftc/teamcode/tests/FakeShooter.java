@@ -1,4 +1,4 @@
-package Tests;
+package org.firstinspires.ftc.teamcode.tests;
 
 import static com.pedropathing.ivy.commands.Commands.instant;
 

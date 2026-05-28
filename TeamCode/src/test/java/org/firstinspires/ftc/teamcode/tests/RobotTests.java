@@ -1,4 +1,4 @@
-package Tests;
+package org.firstinspires.ftc.teamcode.tests;
 
 import static com.pedropathing.ivy.Scheduler.execute;
 import static com.pedropathing.ivy.Scheduler.reset;
@@ -9,14 +9,15 @@ import static com.pedropathing.ivy.commands.Commands.instant;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static java.lang.Thread.sleep;
-
 import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.behaviors.BlockedBehavior;
 import com.pedropathing.ivy.behaviors.ConflictBehavior;
 import com.pedropathing.ivy.behaviors.InterruptedBehavior;
+import com.seattlesolvers.solverslib.util.Timing;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.TimeUnit;
 
 public class RobotTests {
 
@@ -166,20 +167,14 @@ public class RobotTests {
             ;
 
     @Test
-    void testMath() {
-        int motorPowerCalculation = 2 + 2;
-        assertEquals(4, motorPowerCalculation, "Math should work perfectly!");
-    }
-
-    @Test
-    void testOdometryDistance(){
+    public void testOdometryDistance(){
         double xDiff = -20;
         double yDiff = -20;
         assertEquals((20*Math.sqrt(2)), (Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))));
     }
 
     @Test
-    void testGettingAngleToGoal(){
+    public void testGettingAngleToGoal(){
         double xDiff = 144 - 72;
         double yDiff = 144 - 72;
         double targetAngle = Math.toDegrees(Math.atan2(xDiff, yDiff));
@@ -187,8 +182,31 @@ public class RobotTests {
         assertEquals(-45, error);
     }
 
+    protected int loops = 0;
+    protected int secondLoops = 0;
+    protected int storedLoops = 0;
+    protected Timing.Stopwatch loopTimer = new Timing.Stopwatch(TimeUnit.MILLISECONDS);
+    protected Timing.Timer secTimer = new Timing.Timer(1000, TimeUnit.MILLISECONDS);
+
+    public void incrementLoops(){
+        secondLoops++;
+        loops++;
+        if (secTimer.done()){
+            storedLoops = secondLoops;
+            secondLoops = 0;
+            secTimer.start();
+        }
+    }
     @Test
-    void testCommands(){
+    public void testLoopTimer(){
+        for (int i = 0; i<500; i++){
+            incrementLoops();
+        }
+        assertEquals(500, loops);
+    }
+
+    @Test
+    public void testCommands(){
         reset();
         isShooting = false;
         ballCount = 0;
@@ -232,6 +250,6 @@ public class RobotTests {
         currentCommand = "";
         execute();
 
-        assertEquals("manual drive intake off gate closed automatically ", currentCommand);
+        assertEquals("intake off gate closed automatically manual drive ", currentCommand);
     }
 }

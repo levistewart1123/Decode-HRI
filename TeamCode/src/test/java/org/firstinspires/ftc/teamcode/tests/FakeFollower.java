@@ -1,4 +1,4 @@
-package Tests;
+package org.firstinspires.ftc.teamcode.tests;
 
 public class FakeFollower {
     double f, r, t;

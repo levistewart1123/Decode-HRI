@@ -1,4 +1,4 @@
-package Tests;
+package org.firstinspires.ftc.teamcode.tests;
 
 public class FakeMotor {
     double currentPower = 0;
