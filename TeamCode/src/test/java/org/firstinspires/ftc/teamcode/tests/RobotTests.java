@@ -13,6 +13,8 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.behaviors.BlockedBehavior;
 import com.pedropathing.ivy.behaviors.ConflictBehavior;
 import com.pedropathing.ivy.behaviors.InterruptedBehavior;
+import com.qualcomm.robotcore.util.Range;
+import com.seattlesolvers.solverslib.controller.PIDController;
 import com.seattlesolvers.solverslib.util.Timing;
 
 import org.junit.jupiter.api.Test;
@@ -251,5 +253,19 @@ public class RobotTests {
         execute();
 
         assertEquals("intake off gate closed automatically manual drive ", currentCommand);
+    }
+
+
+    public static double headingKP = 0.02;
+    public static double headingKI = 0;
+    public static double headingKD = 0.01;
+    public static double headingKF = 0.03;
+
+
+    @Test
+    public void getAimingPIDFOutput(){
+        PIDController headingPID = new PIDController(headingKP, headingKI, headingKD); //robot todo tune this
+        double error = 45;
+        assertEquals(-1, Range.clip((headingPID.calculate(error) - headingKF * Math.signum(error)), -1, 1)); //!added kF separately
     }
 }

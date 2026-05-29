@@ -17,6 +17,7 @@ import com.pedropathing.ivy.behaviors.InterruptedBehavior;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.controller.PIDController;
 import com.seattlesolvers.solverslib.util.Timing;
 
@@ -274,8 +275,8 @@ public class Robot {
     }
 
     public double getAimingPIDFOutput(){
-        PIDController headingPID = new PIDController(headingKP, headingKI, headingKD); //robot todo tune this or base it off of pedro or copy it over from old code
-        return (headingPID.calculate(getAngleErrorDeg()) + (headingKF *Math.signum(getAngleErrorDeg()))); //!added kF separately
+        PIDController headingPID = new PIDController(headingKP, headingKI, headingKD); //robot todo tune this
+        return (Range.clip((headingPID.calculate(getAngleErrorDeg()) - headingKF * Math.signum(getAngleErrorDeg())), -1, 1)); //!added kF separately
     }
 
     public void startShoot(){
