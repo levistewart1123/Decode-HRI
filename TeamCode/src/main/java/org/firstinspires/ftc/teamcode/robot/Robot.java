@@ -64,10 +64,10 @@ public class Robot {
     double forwardInput, rightInput, rotateInput = 0;
     public boolean isShooting = false;
     public boolean slowDrive = false;
-    public static double headingKP = 0.03;
+    public static double headingKP = 0.025;
     public static double headingKI = 0;
-    public static double headingKD = 0.01;
-    public static double headingKF = 0.15;
+    public static double headingKD = 0.02;
+    public static double headingKF = 0.025;
 
 
     //*movement commands
@@ -80,7 +80,6 @@ public class Robot {
     });
     public Command driveOff = instant(() -> follower.setTeleOpDrive(0,0,0));
     Command startTeleOpDrive = instant(() -> follower.startTeleOpDrive());
-    public Command toggleAiming = instant(() -> autoAiming = !autoAiming);
 
     public Command startManualDrive = sequential(
             startTeleOpDrive,
@@ -205,6 +204,7 @@ public class Robot {
 
     public void periodic(double f, double r, double t){
         follower.update();
+        shooter.autoHood(getDistToGoal());
 
         //kickstand.periodic();
 
@@ -276,7 +276,7 @@ public class Robot {
 
     public double getAimingPIDFOutput(){
         PIDController headingPID = new PIDController(headingKP, headingKI, headingKD); //robot todo tune this
-        return (Range.clip((headingPID.calculate(getAngleErrorDeg()) - headingKF * Math.signum(getAngleErrorDeg())), -1, 1)); //!added kF separately
+        return (Range.clip((headingPID.calculate(getAngleErrorDeg()) - headingKF * Math.signum(getAngleErrorDeg())), -1, 1));
     }
 
     public void startShoot(){

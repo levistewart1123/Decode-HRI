@@ -43,7 +43,7 @@ public class Shooter {
                 new MotorEx(hwMap, "FlywheelLeft", Motor.GoBILDA.NONE.getCPR(), 4825).setInverted(true),
                 new MotorEx(hwMap, "FlywheelRight", Motor.GoBILDA.NONE.getCPR(), 4825)
         );
-        flywheels.setRunMode(Motor.RunMode.RawPower);
+        flywheels.setRunMode(Motor.RunMode.VelocityControl);
 
         flywheels.setVeloCoefficients(0.0015, 0, 0);
         flywheels.setFeedforwardCoefficients(0, 1.45); //robot todo use recalc
@@ -59,9 +59,11 @@ public class Shooter {
         velocities.add(1, 1);
         velocities.add(6, 7);//robot todo replace these and change hood range
         //!velocities.createLUT();
-        angles.add(1, 1);
-        angles.add(6, 7);
-        //!angles.createLUT();
+        angles.add(0, 0);
+        angles.add(50, 0);
+        angles.add(120, 1);
+        angles.add(200, 1);
+        angles.createLUT();
 
         state = States.AUTOMATIC;
     }
@@ -89,6 +91,9 @@ public class Shooter {
         hood.set(angles.get(distance));
 
     }
+    public void autoHood(double distance) {
+        hood.set(angles.get(distance));
+    }
     public void changeState(States state){
         this.state = state;
         switch(state){
@@ -106,7 +111,14 @@ public class Shooter {
         hood.set(position);
     }
     public void runNoPIDF(double power){
+        flywheels.set(power); //!bad
+    }
+    public void runWithPIDF(double power){
         flywheels.set(power);
+    }
+    public void setFlywheelPIDFCoeffs(double kP, double kI, double kD, double kS, double kV, double kA){ //0.55, 55.90
+        flywheels.setVeloCoefficients(kP, kI, kD);
+        flywheels.setFeedforwardCoefficients(kS, kV, kA);
     }
 
 
