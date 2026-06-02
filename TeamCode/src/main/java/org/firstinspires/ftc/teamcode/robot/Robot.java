@@ -128,7 +128,7 @@ public class Robot {
             slowShoot
     )
             .requiring(intake, follower, shooter)
-            .setPriority(1)
+            .setPriority(2)
             ;
     //*other shooter commands
     public Command handleGate = infinite(() -> {

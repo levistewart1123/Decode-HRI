@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.opmode;
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.robot.Robot;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Shooter;
 
 @Configurable
@@ -25,7 +24,7 @@ public class FlywheelTuner extends CommandOpMode{
 
     @Override
     public void loop() {
-        shooter.setFlywheelPIDFCoeffs(kP, kI, kD, kS, kV, kA);
+        shooter.setFlywheelCoeffs(kP, kI, kD, kS, kV, kA);
         shooter.runWithPIDF(power);
         super.loop();
 

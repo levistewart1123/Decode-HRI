@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.opmode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.Paths;
+import org.firstinspires.ftc.teamcode.AutoPaths;
 import org.firstinspires.ftc.teamcode.robot.Robot;
 
 public class Auto extends OpMode {
@@ -17,7 +17,7 @@ public class Auto extends OpMode {
     Step step = Step.MOVE_TO_SHOOT_PRELOADS;
     Robot robot = new Robot();
     protected boolean isRed;
-    Paths paths;
+    AutoPaths autoPaths;
 
     public Auto(boolean isRed) {
         this.isRed = isRed;
@@ -26,7 +26,7 @@ public class Auto extends OpMode {
     @Override
     public void init() {
         robot.init(isRed, hardwareMap);
-        paths = new Paths(robot.follower, isRed);
+        autoPaths = new AutoPaths(robot.follower, isRed);
         robot.setDriveStateManual(Robot.DriveState.OFF);
     }
 
@@ -34,7 +34,7 @@ public class Auto extends OpMode {
     public void loop() {
         switch (step){
             case MOVE_TO_SHOOT_PRELOADS:
-                robot.setDriveStateAutomated(paths.startToShoot);
+                robot.setDriveStateAutomated(autoPaths.startToShoot);
                 break;
                 //etc
         }

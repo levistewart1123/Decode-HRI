@@ -11,8 +11,6 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 import com.seattlesolvers.solverslib.util.InterpLUT;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
 public class Shooter {
 
     public enum States {
@@ -116,7 +114,7 @@ public class Shooter {
     public void runWithPIDF(double power){
         flywheels.set(power);
     }
-    public void setFlywheelPIDFCoeffs(double kP, double kI, double kD, double kS, double kV, double kA){ //0.55, 55.90
+    public void setFlywheelCoeffs(double kP, double kI, double kD, double kS, double kV, double kA){ //0.55, 55.90
         flywheels.setVeloCoefficients(kP, kI, kD);
         flywheels.setFeedforwardCoefficients(kS, kV, kA);
     }
