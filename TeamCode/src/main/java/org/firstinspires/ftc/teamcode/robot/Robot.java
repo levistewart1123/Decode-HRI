@@ -24,6 +24,7 @@ import com.seattlesolvers.solverslib.util.Timing;
 import org.firstinspires.ftc.teamcode.PoseSaver;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.robot.subsystems.BeamBreaks;
+import org.firstinspires.ftc.teamcode.robot.subsystems.HuskyLens;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Kickstand;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Shooter;
@@ -51,6 +52,7 @@ public class Robot {
 
     public Intake intake = new Intake();
     public Shooter shooter = new Shooter();
+    public HuskyLens huskyLens = new HuskyLens();
     public Follower follower;
     public BeamBreaks beamBreaks = new BeamBreaks();
     public Kickstand kickstand = new Kickstand();
@@ -178,6 +180,7 @@ public class Robot {
         follower = Constants.createFollower(hwMap);
         intake.init(hwMap);
         shooter.init(hwMap);
+        huskyLens.init(hwMap);
         //beamBreaks.init(hwMap);
         //kickstand.init(hwMap);
 
