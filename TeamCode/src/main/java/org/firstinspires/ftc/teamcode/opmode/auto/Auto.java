@@ -26,7 +26,7 @@ public class Auto extends OpMode {
     @Override
     public void init() {
         robot.init(isRed, hardwareMap);
-        autoPaths = new AutoPaths(robot.follower, isRed);
+        autoPaths = new AutoPaths(robot.follower, isRed, false);
         robot.setDriveStateManual(Robot.DriveState.OFF);
     }
 

@@ -91,7 +91,7 @@ public class TeleOp extends CommandOpMode {
         super.start();
         robot.periodic(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
         schedule(robot.startManualDrive);
-        //schedule(robot.handleGate);
+        schedule(robot.handleGate);
         schedule(robot.handleIntake);
         execute();
 
@@ -107,7 +107,7 @@ public class TeleOp extends CommandOpMode {
         }
         //*shooting
         if (gamepad1.xWasPressed()){
-            schedule(robot.shoot);
+            schedule(robot.slowShoot);
         }
         //*slow mode
         if (gamepad1.aWasPressed()){

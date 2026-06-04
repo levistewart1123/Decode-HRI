@@ -27,6 +27,7 @@ public class CommandOpMode extends OpMode {
 
     @Override
     public void init() {
+        reset();
     }
 
     @Override

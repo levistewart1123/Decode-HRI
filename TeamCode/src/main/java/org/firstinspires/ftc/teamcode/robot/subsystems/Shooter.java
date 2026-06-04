@@ -4,12 +4,15 @@ import static com.pedropathing.ivy.commands.Commands.instant;
 
 import com.pedropathing.ivy.Command;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.motors.MotorGroup;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 import com.seattlesolvers.solverslib.util.InterpLUT;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Shooter {
 
@@ -20,8 +23,9 @@ public class Shooter {
     }
     States state = States.AUTOMATIC;
 
-    final double GATE_OPEN_ANGLE = Math.toRadians(120);//robot todo fix these
+    final double GATE_OPEN_ANGLE = 5;//robot todo fix these
     final double GATE_CLOSED_ANGLE = 0;
+    PIDFController flywheelPIDF = new PIDFController(0, 0, 0, 100);
     private MotorGroup flywheels;
     private ServoEx gate;
     private ServoEx hood;
@@ -38,17 +42,16 @@ public class Shooter {
 
     public void init(HardwareMap hwMap){
         flywheels = new MotorGroup(
-                new MotorEx(hwMap, "FlywheelLeft", Motor.GoBILDA.NONE.getCPR(), 4825).setInverted(true),
-                new MotorEx(hwMap, "FlywheelRight", Motor.GoBILDA.NONE.getCPR(), 4825)
+                new MotorEx(hwMap, "FlywheelLeft", 28, 4825).setInverted(true),
+                new MotorEx(hwMap, "FlywheelRight", 28, 4825)
         );
         flywheels.setRunMode(Motor.RunMode.VelocityControl);
 
-        flywheels.setVeloCoefficients(0.0015, 0, 0);
-        flywheels.setFeedforwardCoefficients(0, 1.45); //robot todo use recalc
+        flywheels.setVeloCoefficients(20, 0, 0);//maybe retune kP
+        flywheels.setFeedforwardCoefficients(350, 1.26); //robot todo use recalc
 
-        //gate = new ServoEx(hwMap, "Gate", GATE_CLOSED_ANGLE, GATE_OPEN_ANGLE);
-        //gate = hwMap.get(ServoEx.class, "Gate");
-        //gate.setInverted(true);
+        gate = new ServoEx(hwMap, "Gate");
+        gate.setInverted(true);
 //        gateEncoder = new AbsoluteAnalogEncoder(hwMap, "Gate Encoder", 3.3, AngleUnit.RADIANS); //robot todo try out gate encoder w/telemetry
 
         hood = new ServoEx(hwMap, "Hood", 0, Math.toRadians(120));
@@ -65,16 +68,19 @@ public class Shooter {
 
         state = States.AUTOMATIC;
     }
+    public double getFlywheelVelocity(){
+        return flywheels.getVelocity();
+    }
 
     public void openGate(){
         gate.set(0);
     }
     public void closeGate(){
-        gate.set(1);
+        gate.set(0.85);
     } //robot todo make sure this works
 
     public Command open = instant(() -> gate.set(0));
-    public Command close = instant(() -> gate.set(1));
+    public Command close = instant(() -> gate.set(0.85));
     public boolean gateIsOpen(){
         return gate.get() == 0; //robot todo try out gate encoder w/telemetry (see above)
     }
@@ -111,7 +117,7 @@ public class Shooter {
     public void runNoPIDF(double power){
         flywheels.set(power); //!bad
     }
-    public void runWithPIDF(double power){
+    public void runWithPIDF(double power){ //-1 to 1
         flywheels.set(power);
     }
     public void setFlywheelCoeffs(double kP, double kI, double kD, double kS, double kV, double kA){ //0.55, 55.90

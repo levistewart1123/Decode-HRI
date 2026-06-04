@@ -20,6 +20,7 @@ public class BeamBreaks {
 
 
     public void init(HardwareMap hwMap){
+        prism = hwMap.get(GoBildaPrismDriver.class, "prism");
         top = hwMap.get(DigitalChannel.class, "Beam Break Top");//robot todo wiring
         middle = hwMap.get(DigitalChannel.class, "Beam Break Middle");
         bottom = hwMap.get(DigitalChannel.class, "Beam Break Bottom");
