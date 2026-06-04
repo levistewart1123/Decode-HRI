@@ -270,8 +270,10 @@ public class Robot {
     public double getAngleErrorDeg(){
         double xDiff = goalPose.getX() - follower.getPose().getX();
         double yDiff = goalPose.getY() - follower.getPose().getY();
-        double targetAngle = Math.toDegrees(Math.atan2(xDiff, yDiff));
-        return Math.toDegrees(follower.getHeading()) - targetAngle;
+        double badAngle = Math.toDegrees(Math.atan2(xDiff, yDiff));
+        double targetAngle = Math.atan2(Math.cos(badAngle), Math.sin(badAngle));
+
+        return Math.toDegrees(targetAngle - follower.getHeading());
     }
 
     public double getAimingPIDFOutput(){

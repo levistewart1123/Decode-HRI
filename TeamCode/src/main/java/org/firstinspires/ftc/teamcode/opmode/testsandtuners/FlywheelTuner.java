@@ -29,7 +29,7 @@ public class FlywheelTuner extends CommandOpMode {
         shooter.setFlywheelCoeffs(kP, kI, kD, kS, kV, kA);
         shooter.runWithPIDF(power);
         velocity = shooter.getFlywheelVelocity();
-        telemetry.addData("velocity: ",velocity);
+        telemetry.addData("velocity: ", velocity);
         super.loop();
 
 
