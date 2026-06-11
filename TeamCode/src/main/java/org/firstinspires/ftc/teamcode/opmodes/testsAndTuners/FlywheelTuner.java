@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.opmodes.CommandOpMode;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Shooter;
 
 @Configurable
-@TeleOp(name = "Flywheel Tuner (Panels)", group = "1: fixers and tuners")
+@TeleOp(name = "Flywheel Tuner (Panels)", group = "1: tuners")
 public class FlywheelTuner extends CommandOpMode {
     public static double velocity;
     private Shooter shooter = new Shooter();

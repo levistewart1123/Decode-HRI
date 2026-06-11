@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.robot.Robot;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Shooter;
 
 @Configurable
-@TeleOp(name = "Auto RPM Tuner", group = "1: fixers and tuners")
+@TeleOp(name = "Auto RPM Tuner", group = "1: tuners")
 public class AutoRPMTuner extends CommandOpMode {
     public static double power = 0;
     public static double hoodPos = 0.25;

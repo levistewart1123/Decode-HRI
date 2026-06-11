@@ -136,7 +136,7 @@ public class BaseTeleOp extends CommandOpMode {
             robot.shooter.setClose(false);
         }
         //*telemetry
-        telemetry.addData("angle error: ", (robot.getAngleErrorDeg()));
+        telemetry.addData("angle error: ", (robot.getOdoAngleErrorDeg()));
         telemetry.addData("angle: ", (Math.toDegrees(robot.follower.getPose().getHeading())));
         telemetry.addLine(Scheduler.isRunning(robot.shoot) ? "shooting" : "not shooting");
         telemetry.addLine(Scheduler.isRunning(robot.handleIntake) ? "manual intake" : "not manual intake");

@@ -3,11 +3,12 @@ package org.firstinspires.ftc.teamcode.robot;
 import static com.pedropathing.ivy.commands.Commands.conditional;
 import static com.pedropathing.ivy.commands.Commands.infinite;
 import static com.pedropathing.ivy.commands.Commands.instant;
-import static com.pedropathing.ivy.commands.Commands.lazy;
 import static com.pedropathing.ivy.commands.Commands.waitMs;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import static com.seattlesolvers.solverslib.util.MathUtils.normalizeAngle;
+
+import static java.lang.Math.abs;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
@@ -16,7 +17,6 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.behaviors.BlockedBehavior;
 import com.pedropathing.ivy.behaviors.ConflictBehavior;
 import com.pedropathing.ivy.behaviors.InterruptedBehavior;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
@@ -29,6 +29,7 @@ import org.firstinspires.ftc.teamcode.robot.subsystems.BeamBreaks;
 import org.firstinspires.ftc.teamcode.robot.subsystems.HuskyLens;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Kickstand;
+import org.firstinspires.ftc.teamcode.robot.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Shooter;
 
 
@@ -53,8 +54,9 @@ public class Robot {
     public Follower follower;
     public BeamBreaks beamBreaks = new BeamBreaks();
     public Kickstand kickstand = new Kickstand();
-    public Limelight3A limelight = null;
+    public Limelight limelight = null;
     public boolean autoAiming = false;
+    public boolean limelightAim = false;
     public Pose goalPose;
     public Pose redGoal = new Pose(134, 139);
     public Pose humanPZ;
@@ -67,13 +69,54 @@ public class Robot {
     public static double headingKD = 0.02;
     public static double headingKF = 0.025;
     public boolean isRed;
+    private double savedOdoAngleDeg;
 
 
     //*movement commands
-//    public Command fixHeading() = Command.b;
+
+    public Command aimAndStoreHeading() {
+        return Command.build()
+                .setStart(() -> {
+                    autoAiming = true;
+                    limelightAim = false;
+                })
+                .setDone(() -> abs(getOdoAngleErrorDeg()) < 0.5) //doesn't account for overshoot
+                .setEnd((endCondition) -> {
+                    autoAiming = false;
+                    savedOdoAngleDeg = Math.toDegrees(follower.getPose().getHeading());
+                })
+                .requiring(follower)
+                ;
+    }
+    public Command correctHeadingWithLimelight() {
+        return Command.build()
+                .setStart(() -> {
+                    autoAiming = true;
+                    limelightAim = true;
+                })
+                .setDone(() -> abs(limelight.getTx()) < 0.5) //doesn't account for overshoot
+                .setEnd((endCondition) -> {
+                    autoAiming = false;
+                    follower.setHeading(savedOdoAngleDeg);
+                })
+                .requiring(follower)
+                ;
+    }
+    public Command correctHeading = sequential(
+            aimAndStoreHeading(),
+            correctHeadingWithLimelight()
+    )
+            .requiring(follower)
+            .setPriority(2)
+            .setConflictBehavior(ConflictBehavior.OVERRIDE)
+            ;
     public Command handleDriveInput = infinite(() -> {
         if (autoAiming) {
-            follower.setTeleOpDrive(forwardInput, rightInput, getAimingPIDFOutput());
+            if (limelightAim) {
+                follower.setTeleOpDrive(forwardInput, rightInput, getAimingPIDFOutput(getOdoAngleErrorDeg()));
+            } else {
+                follower.setTeleOpDrive(forwardInput, rightInput, getAimingPIDFOutput(limelight.getTx()));
+            }
         } else {
             follower.setTeleOpDrive(forwardInput, rightInput, rotateInput);
         }
@@ -189,15 +232,18 @@ public class Robot {
         shooter.initialize(hwMap);
         huskyLens.initialize(hwMap);
         beamBreaks.initialize(hwMap);
+        limelight.initialize(hwMap);
 
         //kickstand.init(hwMap);
         this.isRed = isRed;
         if (isRed) {
             goalPose = redGoal;
             humanPZ = redHPZ;
+            limelight.setPipeline(0); //!check
         } else {
             goalPose = redGoal.mirror();
             humanPZ = redHPZ.mirror();
+            limelight.setPipeline(1);
         }
         if (PoseSaver.autoWasRun) {
             follower.setStartingPose(PoseSaver.endPose);
@@ -217,6 +263,8 @@ public class Robot {
     public void update(double f, double r, double t) {
         follower.update();
 
+        limelight.update();
+
         shooter.update(getDistToGoal());
 
         //kickstand.update();
@@ -234,7 +282,7 @@ public class Robot {
         //beamBreaks.auraFarm();
     }
 
-    public double getAngleErrorDeg() {
+    public double getOdoAngleErrorDeg() {
         double xDiff = goalPose.getX() - follower.getPose().getX();
         double yDiff = goalPose.getY() - follower.getPose().getY();
         double angleFromCoords = Math.toDegrees(Math.atan2(yDiff, xDiff));
@@ -244,9 +292,9 @@ public class Robot {
         return normalizeAngle(targetAngle - currentHeading, false, AngleUnit.DEGREES);
     }
 
-    public double getAimingPIDFOutput() {
+    public double getAimingPIDFOutput(double angleErrorDeg) {
         PIDController headingPID = new PIDController(headingKP, headingKI, headingKD); //robot todo tune this
-        return -1 * (Range.clip((headingPID.calculate(getAngleErrorDeg()) - headingKF * Math.signum(getAngleErrorDeg())), -1, 1));
+        return -1 * (Range.clip((headingPID.calculate(angleErrorDeg) - headingKF * Math.signum(angleErrorDeg)), -1, 1));
     }
 
     double x = 0; // your initial state

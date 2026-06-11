@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.robot.Robot;
  * for autoaim testing
  */
 @TeleOp(name = "Autoaim Test", group = "2: tests")
-public class AngleTester extends CommandOpMode {
+public class OdometryAngleTester extends CommandOpMode {
     private Robot robot = new Robot();
     @Override
     public void init() {
@@ -26,7 +26,7 @@ public class AngleTester extends CommandOpMode {
     public void loop() {
         robot.follower.update();
         telemetry.addData("loops: ", super.loops);
-        telemetry.addData("angle error in degrees: ", robot.getAngleErrorDeg());
+        telemetry.addData("angle error in degrees: ", robot.getOdoAngleErrorDeg());
         super.loop();
     }
 
