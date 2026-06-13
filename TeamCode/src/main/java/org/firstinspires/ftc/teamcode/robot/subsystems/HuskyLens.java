@@ -20,7 +20,6 @@ public class HuskyLens {
         com.qualcomm.hardware.dfrobot.HuskyLens.Block[] blocks = huskyLens.blocks();
         for (com.qualcomm.hardware.dfrobot.HuskyLens.Block block : blocks) {
             double x = block.x;
-            double y = block.y;
             if (x < centerLineX) {
                 leftBallAmount++;
             } else if (x > centerLineX) {
