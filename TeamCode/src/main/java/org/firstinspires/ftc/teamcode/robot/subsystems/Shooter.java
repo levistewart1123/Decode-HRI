@@ -139,8 +139,7 @@ public class Shooter {
     double a = ShooterConstants.SCORE_ANGLE;
 
     //calculate initial launch components
-    double hoodAngle = MathFunctions.clamp(Math.atan(2 * y / /*x*/ - Math.tan(a)), ShooterConstants.HOOD_MAX_ANGLE,
-            ShooterConstants.HOOD_MIN_ANGLE);
+    double hoodAngle = MathFunctions.clamp(Math.atan(2 * y / /*x*/ - Math.tan(a)), ShooterConstants.HOOD_MAX_ANGLE, ShooterConstants.HOOD_MIN_ANGLE);
 
     double flywheelSpeed = Math.sqrt(g * x * x / (2 * Math.pow(Math.cos(hoodAngle), 2) * (x * Math.tan(hoodAngle) - y)));
 
@@ -171,7 +170,5 @@ public class Shooter {
 
 
         return new Vector(flywheelSpeed, hoodAngle);
-}
-
-
+    }
 }

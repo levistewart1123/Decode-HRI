@@ -51,7 +51,7 @@ public class Robot {
     public Intake intake = new Intake();
     public Shooter shooter = new Shooter();
     public HuskyLens huskyLens = new HuskyLens();
-    public Follower follower;
+    public Follower follower; //! change if needed
     public BeamBreaks beamBreaks = new BeamBreaks();
     public Kickstand kickstand = new Kickstand();
     public Limelight limelight = new Limelight();
@@ -151,7 +151,7 @@ public class Robot {
     }
 
 
-    Command fastShoot = sequential(
+    public Command fastShoot = sequential(
             setShooting(true),
             intake.setIn,
             waitMs(700),
