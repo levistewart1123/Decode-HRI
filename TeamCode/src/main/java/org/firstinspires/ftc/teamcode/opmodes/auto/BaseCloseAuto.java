@@ -25,6 +25,9 @@ public class BaseCloseAuto extends CommandOpMode {
     public BaseCloseAuto(boolean isRed){
         this.isRed = isRed;
     }
+
+    public int middleSpikeMarkStartHeading;
+
     public Pose start, shoot, leave, gateCollect, spikeMarkTop, spikeMarkMiddle, spikeMarkBottom, midSpikeControl, midShootControl, topSpikeControl;
     public PathChain shootToLeave, startToShoot, shootToSpikeMarkTop, shootToSpikeMarkMiddle, shootToSpikeMarkBottom, shootToGateCollect, spikeMarkTopToShoot, spikeMarkMiddleToShoot, spikeMarkBottomToShoot, gateCollectToShoot;
 
@@ -52,21 +55,23 @@ public class BaseCloseAuto extends CommandOpMode {
         midSpikeControl = new Pose(35.2, 60);
         midShootControl = new Pose(35.2, 60);
         topSpikeControl = new Pose(50,83.7);
+        middleSpikeMarkStartHeading = 170;
 
 
 
         //Pose FinalShoot = new Pose(47.4,115.0, Math.toRadians(150.4));
         if (isRed) {
-            start.mirror();
-            shoot.mirror();
-            gateCollect.mirror();
-            spikeMarkTop.mirror();
-            spikeMarkMiddle.mirror();
-            spikeMarkBottom.mirror();
+            start = start.mirror();
+            shoot = shoot.mirror();
+            gateCollect = gateCollect.mirror();//! may need to change on game field ata event.
+            spikeMarkTop = spikeMarkTop.mirror();
+            spikeMarkMiddle = spikeMarkMiddle.mirror();
+            spikeMarkBottom = spikeMarkBottom.mirror();
 
-            midSpikeControl.mirror();
-            midShootControl.mirror();
-            topSpikeControl.mirror();
+            midSpikeControl = midSpikeControl.mirror();
+            midShootControl = midShootControl.mirror();
+            topSpikeControl = topSpikeControl.mirror();
+            middleSpikeMarkStartHeading = 10;
         }
 
         robot.follower.setPose(start);
@@ -99,7 +104,7 @@ public class BaseCloseAuto extends CommandOpMode {
                         midSpikeControl,
                         spikeMarkMiddle
                 ))
-                .setLinearHeadingInterpolation(Math.toRadians(170)/*!not shoot's heading*/, spikeMarkMiddle.getHeading())
+                .setLinearHeadingInterpolation(Math.toRadians(middleSpikeMarkStartHeading)/*!not shoot's heading*/, spikeMarkMiddle.getHeading())//170
                 .build();
         shootToSpikeMarkBottom = robot.follower.pathBuilder()
                 .addPath(new BezierLine(
