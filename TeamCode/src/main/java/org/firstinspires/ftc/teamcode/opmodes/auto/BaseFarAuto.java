@@ -9,6 +9,7 @@ import static com.pedropathing.ivy.groups.Groups.repeat;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
+import static com.pedropathing.ivy.groups.Groups.race;
 
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -35,12 +36,12 @@ public class BaseFarAuto extends CommandOpMode {
 
 
     public void buildPaths(boolean isRed) {
-        farLowHPCollect = new Pose(11, 7, Math.toRadians(180));
+        farLowHPCollect = new Pose(15, 7, Math.toRadians(183));
         farHighHPCollect = new Pose(10,25.000, Math.toRadians(180));
         spikeMarkBottom = new Pose(11.6, 40, Math.toRadians(180));
 
         start = new Pose(55.6, 7.2, Math.toRadians(90));
-        shoot = new Pose(56.9, 20.6, Math.toRadians(118.5));
+        shoot = new Pose(56.9, 20.6, Math.toRadians(119.5));
         sideDetermineheading = 180;
         //side determine heading 180
 
@@ -131,13 +132,16 @@ public class BaseFarAuto extends CommandOpMode {
     }
 
     public Command jiggle = sequential(
+            robot.intake.run(1),
             instant(() -> {
                 robot.follower.startTeleOpDrive();
-                robot.follower.setTeleOpDrive(-0.7, 0, 0);
+                robot.follower.setTeleOpDrive(-0.8, 0, 0);
             }),
             waitMs(500),
-            instant(() -> robot.follower.setTeleOpDrive(0.7, 0, 0)),
-            waitMs(500),
+            robot.intake.run(1),
+            instant(() -> robot.follower.setTeleOpDrive(0.6, 0, 0)),
+            waitMs(800),
+            robot.intake.run(0),
             robot.driveOff
     );
 
@@ -162,16 +166,15 @@ public class BaseFarAuto extends CommandOpMode {
                         robot.fastShoot, //* may need to be slow Shoot
                         robot.intake.setIn,
                         follow(robot.follower, shootToSpikeMarkBottom),
-                        jiggle,
                         robot.intake.run(0),
                         parallel(follow(robot.follower, spikeMarkBottomToShoot), prepareShoot),
                         robot.shooter.open,
                         robot.fastShoot, //* may need to be slow Shoot
                         //waitUntil(robot.isShooting == false), //! robot.isShooting is not BooleanSupplier
                         robot.intake.setIn,
-                        follow(robot.follower, sideDetermineToFarLowHPCollect, 0.6),
+                        race(follow(robot.follower, sideDetermineToFarLowHPCollect, 0.8),waitMs(3000)),
+
                         jiggle,
-                        robot.intake.run(0),
                         parallel(follow(robot.follower, farLowHPCollectToShoot), prepareShoot),
                         robot.shooter.open,
                         robot.fastShoot, //* may need to be slow Shoot
@@ -179,7 +182,7 @@ public class BaseFarAuto extends CommandOpMode {
                         turnTo(robot.follower, Math.toRadians(sideDetermineheading)),
                         determineSide,
                         robot.intake.setIn,
-                        humanPlayerZoneTo,
+                        race(humanPlayerZoneTo, waitMs(2000)),
                         jiggle,
                         robot.intake.run(0),
                         parallel(humanPlayerZoneBack, prepareShoot),
@@ -189,11 +192,9 @@ public class BaseFarAuto extends CommandOpMode {
                         turnTo(robot.follower, Math.toRadians(sideDetermineheading)),
                         determineSide,
                         robot.intake.setIn,
-                        humanPlayerZoneTo,
+                        race(humanPlayerZoneTo, waitMs(2000)),
                         jiggle,
-                        robot.intake.run(0),
                         parallel(humanPlayerZoneBack, prepareShoot),
-                        jiggle,
                         robot.shooter.open,
                         robot.fastShoot //* may need to be slow Shoot
                 )
