@@ -128,7 +128,7 @@ public class Robot {
         }
     });
 
-    Command startTeleOpDrive = instant(() -> follower.startTeleOpDrive());
+    public Command startTeleOpDrive = instant(() -> follower.startTeleOpDrive());
 
     public Command driveOff = instant(() -> follower.setTeleOpDrive(0,0,0));
 

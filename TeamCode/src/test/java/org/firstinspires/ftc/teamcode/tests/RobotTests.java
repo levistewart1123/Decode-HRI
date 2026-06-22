@@ -10,6 +10,9 @@ import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.seattlesolvers.solverslib.util.MathUtils.normalizeAngle;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static java.lang.Math.abs;
+
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.behaviors.BlockedBehavior;
 import com.pedropathing.ivy.behaviors.ConflictBehavior;
@@ -292,5 +295,40 @@ public class RobotTests {
             speed = shooter.flywheels.get();
         }
         assertEquals(0.5, speed);
+    }
+    @Test
+    public void getClosestShootPose(){ //red side
+        Pose currentPose = new Pose(120,15);
+        Pose closePose;
+        boolean redSide = currentPose.getX() >= 72;
+        if (currentPose.getY() <= -abs(currentPose.getX() - 72) + 65) {
+            closePose = new Pose(72, 65);
+        } else {
+            closePose = currentPose;
+            boolean good = poseInShootingZone(closePose);
+            while (!poseInShootingZone(closePose)) {
+                closePose = new Pose(closePose.getX() + ((redSide ? -1 : 1) * 1), closePose.getY() + 1);
+            }
+        }
+        Pose farPose;
+        if (currentPose.getY() >= abs(currentPose.getX() - 72) + 31) { //this is wrong
+            farPose = new Pose(72, 31);
+        } else {
+            farPose = currentPose;
+            while (!poseInShootingZone(farPose)) {
+                farPose = new Pose(farPose.getX() + ((redSide ? -1 : 1) * 0.5), (farPose.getY() <= 14 ? farPose.getY() : (farPose.getY() - 0.5)));
+            }
+        }
+        double closeDist = getDistFromPoints(currentPose, closePose);
+        double farDist = getDistFromPoints(currentPose, farPose);
+        assertEquals (farPose, (getDistFromPoints(currentPose, closePose) < getDistFromPoints(currentPose, farPose) ? closePose : farPose));
+    }
+    boolean poseInShootingZone(Pose pose){
+        return (pose.getY() >= abs(pose.getX() - 72) + 65) || (pose.getY() <= -abs(pose.getX() - 72) + 31);
+    }
+    double getDistFromPoints(Pose start, Pose end) {
+        double xDiff = end.getX() - start.getX();
+        double yDiff = end.getY() - start.getY();
+        return abs(Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)));
     }
 }

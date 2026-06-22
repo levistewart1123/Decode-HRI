@@ -29,4 +29,10 @@ public class HuskyLens {
 
         return Double.compare(rightBallAmount, leftBallAmount);
     }
+    public boolean canSeeBalls(){
+        return true;
+    }
+    public double getClosestBallDeg(){
+        return 0;
+    }
 }
