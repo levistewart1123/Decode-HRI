@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import static com.pedropathing.ivy.commands.Commands.branch;
-import static com.pedropathing.ivy.commands.Commands.conditional;
 import static com.pedropathing.ivy.commands.Commands.infinite;
-import static com.pedropathing.ivy.groups.Groups.parallel;
+import static com.pedropathing.ivy.commands.Commands.lazy;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
@@ -17,7 +16,6 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.behaviors.BlockedBehavior;
 import com.pedropathing.ivy.behaviors.ConflictBehavior;
 import com.pedropathing.ivy.behaviors.InterruptedBehavior;
-import com.pedropathing.ivy.commands.Commands;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -48,7 +46,7 @@ public class FullAutomatedTeleOp extends CommandOpMode {
             .setConflictBehavior(ConflictBehavior.QUEUE)
             .setPriority(0);
 
-    Command centerOnClosestBall() {
+    Command centerOnClosestBall = lazy(() -> {
     return infinite(() ->
             robot.follower.setTeleOpDrive(0,0,robot.getAimingPIDFOutput(robot.huskyLens.getClosestBallDeg()))
             )
@@ -60,7 +58,8 @@ public class FullAutomatedTeleOp extends CommandOpMode {
             .setPriority(1)
             ; //check that this actually updates
     }
-    Command driveToClosestBall(){
+    );
+    Command driveToClosestBall = lazy(() -> {
         return infinite(() -> robot.follower.setTeleOpDrive(1,0,0))
                 .until(() -> robot.huskyLens.getClosestBallDeg() > 5)
                 .requiring(robot)
@@ -70,11 +69,12 @@ public class FullAutomatedTeleOp extends CommandOpMode {
                 .setPriority(2)
                 ;
     }
+    );
     LinkedHashMap<BooleanSupplier, Command> intakeCases = new LinkedHashMap<>();
 
     Command intake = branch(intakeCases).until(() -> robot.beamBreaks.getBallCount() == 3);
 
-    Command moveToClosestShootingZone() {
+    Command moveToClosestShootingZone = lazy(() -> {
         PathChain robotPoseToShootingZone = robot.follower.pathBuilder()
                 .addPath(new BezierLine(
                         robot.follower.getPose(),
@@ -84,6 +84,8 @@ public class FullAutomatedTeleOp extends CommandOpMode {
                 .build();
         return follow(robot.follower, robotPoseToShootingZone);
     }
+    );
+
 
     public Pose getClosestShootPose(){ //red side
         Pose currentPose = robot.follower.getPose();
@@ -128,8 +130,8 @@ public class FullAutomatedTeleOp extends CommandOpMode {
     public void init() {
         robot.initialize(isRed, hardwareMap);
         intakeCases.put(() -> !robot.huskyLens.canSeeBalls(), findBalls);
-        intakeCases.put(() -> robot.huskyLens.getClosestBallDeg() > 5, centerOnClosestBall());
-        intakeCases.put(() -> true, driveToClosestBall());
+        intakeCases.put(() -> robot.huskyLens.getClosestBallDeg() > 5, centerOnClosestBall);
+        intakeCases.put(() -> true, driveToClosestBall);
         if (PoseSaver.autoWasRun) {
             robot.follower.setStartingPose(PoseSaver.endPose);
         } else {
@@ -158,7 +160,7 @@ public class FullAutomatedTeleOp extends CommandOpMode {
             if (poseInShootingZone(robot.follower.getPose())){
                 schedule(sequential(turnTo(robot.follower, getHeadingToPointsRad(robot.follower.getPose(), robot.goalPose)), robot.fastShoot));
             } else {
-                schedule(sequential(moveToClosestShootingZone(), robot.fastShoot));
+                schedule(sequential(moveToClosestShootingZone, robot.fastShoot));
             }
         }
         super.loop();
