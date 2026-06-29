@@ -26,7 +26,7 @@ public class OdometryAngleTester extends CommandOpMode {
     public void loop() {
         robot.follower.update();
         telemetry.addData("loops: ", super.loops);
-        telemetry.addData("angle error in degrees: ", robot.getOdoAngleErrorDeg(false));
+        telemetry.addData("angle error in degrees: ", robot.getOdoGoalAngleErrorDeg(false));
         super.loop();
     }
 

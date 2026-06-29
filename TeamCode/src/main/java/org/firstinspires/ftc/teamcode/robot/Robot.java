@@ -3,7 +3,10 @@ package org.firstinspires.ftc.teamcode.robot;
 import static com.pedropathing.ivy.commands.Commands.conditional;
 import static com.pedropathing.ivy.commands.Commands.infinite;
 import static com.pedropathing.ivy.commands.Commands.instant;
+import static com.pedropathing.ivy.commands.Commands.lazy;
 import static com.pedropathing.ivy.commands.Commands.waitMs;
+import static com.pedropathing.ivy.commands.Commands.waitUntil;
+import static com.pedropathing.ivy.groups.Groups.race;
 import static com.pedropathing.ivy.groups.Groups.sequential;
 import static com.seattlesolvers.solverslib.util.MathUtils.normalizeAngle;
 
@@ -13,6 +16,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.Scheduler;
 import com.pedropathing.ivy.behaviors.BlockedBehavior;
 import com.pedropathing.ivy.behaviors.ConflictBehavior;
 import com.pedropathing.ivy.behaviors.InterruptedBehavior;
@@ -32,6 +36,7 @@ import org.firstinspires.ftc.teamcode.robot.subsystems.Limelight;
 import org.firstinspires.ftc.teamcode.robot.subsystems.Shooter;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -72,6 +77,8 @@ public class Robot {
     public static double headingKF = 0.03;
     public boolean isRed;
     private double savedOdoAngleDeg;
+    ArrayList<Pose> limelightPoses = new ArrayList<>(10);
+    int posesRead = 0;
 
 
     //*movement commands
@@ -83,7 +90,7 @@ public class Robot {
                     autoAiming = true;
                     limelightAim = false;
                 })
-                .setDone(() -> abs(getOdoAngleErrorDeg(false)) < 0.5) //doesn't account for overshoot
+                .setDone(() -> abs(getOdoGoalAngleErrorDeg(false)) < 0.5) //doesn't account for overshoot
                 .setEnd((endCondition) -> {
                     autoAiming = false;
                     savedOdoAngleDeg = Math.toDegrees(follower.getPose().getHeading());
@@ -121,7 +128,7 @@ public class Robot {
             if (limelightAim && limelight.canSeeGoal()) {
                 follower.setTeleOpDrive(forwardInput, rightInput, getAimingPIDFOutput(limelight.getTx()));
             } else {
-                follower.setTeleOpDrive(forwardInput, rightInput, getAimingPIDFOutput(getOdoAngleErrorDeg(false)));
+                follower.setTeleOpDrive(forwardInput, rightInput, getAimingPIDFOutput(getOdoGoalAngleErrorDeg(false)));
             }
         } else {
             follower.setTeleOpDrive(forwardInput, rightInput, rotateInput);
@@ -175,6 +182,48 @@ public class Robot {
             )
             .requiring(intake, shooter)
             .setPriority(2);
+
+
+    /**
+     * uses a moving average filter to take the average of 10 limelight mt1 poses
+     * and then sets the current pose to it
+     */
+    public Command localizeWithSmoothedLlPose = lazy(() -> {
+                return sequential(
+                        driveOff,
+                        waitUntil(() -> (follower.getVelocity().getMagnitude() < 0.1) && follower.getAngularVelocity() < 0.1),
+                        Command.build()
+                                .setStart(() -> {
+                                    limelightPoses.clear();
+                                    posesRead = 0;
+                                })
+                                .setExecute(() -> {
+                                    limelightPoses.add(limelight.getMt1Pose());
+                                    posesRead++;
+                                })
+                                .setDone(() -> posesRead == 10)
+                                .setEnd(endCondition -> {
+                                    double xSum = 0, ySum = 0, sinSum = 0, cosSum = 0;
+                                    for (Pose pose : limelightPoses) {
+                                        xSum += pose.getX();
+                                        ySum += pose.getY();
+                                        sinSum += Math.sin(pose.getHeading());
+                                        cosSum += Math.cos(pose.getHeading());
+                                    }
+                                    follower.setPose(new Pose(
+                                            xSum / limelightPoses.size(),
+                                            ySum / limelightPoses.size(),
+                                            Math.atan2(sinSum, cosSum)
+                                    ));
+                                }))
+                        ;
+            }
+    )
+            .requiring(follower)
+            .setPriority(1)
+            ;
+
+
     /**
      * waits for gate to open, shoots, then closes gate
      */
@@ -344,7 +393,7 @@ public class Robot {
      * @param sotm if this should use the offset shoot-on-the-move goal pose or the real one
      * @return the error in degrees
      */
-    public double getOdoAngleErrorDeg(boolean sotm) {
+    public double getOdoGoalAngleErrorDeg(boolean sotm) {
         double targetAngle = sotm ? getAngleToSotmGoalDeg() : getRealAngleToGoalDeg();
         double currentHeading = Math.toDegrees(follower.getPose().getHeading());
 

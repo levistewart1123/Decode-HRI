@@ -134,7 +134,7 @@ public class BaseTeleOp extends CommandOpMode {
         telemetry.addData("Pose: ", robot.follower.getPose());
         telemetry.addData("Goal Pose: ", robot.goalPose);
         telemetry.addData("angle: ", Math.toDegrees(robot.follower.getPose().getHeading()));
-        telemetry.addData("angle error: ", (robot.getOdoAngleErrorDeg(false)));
+        telemetry.addData("angle error: ", (robot.getOdoGoalAngleErrorDeg(false)));
         telemetry.addData("distance to goal: ", robot.getDistToGoal());
 
 

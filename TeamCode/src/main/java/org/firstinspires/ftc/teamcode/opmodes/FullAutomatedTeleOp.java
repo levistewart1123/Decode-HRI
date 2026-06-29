@@ -158,9 +158,9 @@ public class FullAutomatedTeleOp extends CommandOpMode {
         robot.update(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
         if (robot.beamBreaks.getBallCount() == 3){
             if (poseInShootingZone(robot.follower.getPose())){
-                schedule(sequential(turnTo(robot.follower, getHeadingToPointsRad(robot.follower.getPose(), robot.goalPose)), robot.fastShoot));
+                schedule(sequential(turnTo(robot.follower, getHeadingToPointsRad(robot.follower.getPose(), robot.goalPose)), robot.fastShoot, robot.localizeWithSmoothedLlPose));
             } else {
-                schedule(sequential(moveToClosestShootingZone, robot.fastShoot));
+                schedule(sequential(moveToClosestShootingZone, robot.fastShoot, robot.localizeWithSmoothedLlPose));
             }
         }
         super.loop();
